@@ -1,0 +1,59 @@
+@startuml
+!define RECTANGLE class
+
+title UML-діаграма розгортання системи віддаленого керування ПЛК та ПЧ
+
+node "Клієнтський пристрій" {
+    artifact "Веб-браузер" as browser {
+        component "React Frontend" as react
+        component "JavaScript" as js
+    }
+}
+
+node "Веб-сервер" {
+    artifact "Node.js Application" as nodejs {
+        component "Express.js" as express
+        component "REST API" as api
+        component "Modbus TCP Client" as modbus_client
+    }
+}
+
+node "База даних" {
+    artifact "MySQL Server" as mysql {
+        database "Користувачі" as users_db
+        database "Конфігурації ПЛК" as config_db
+        database "Історія операцій" as history_db
+    }
+}
+
+node "Промислова мережа" {
+    node "ПЛК #1" as plc1 {
+        artifact "Modbus TCP Server" as modbus_plc1
+        component "Ladder Logic" as logic1
+    }
+    
+    node "ПЧ #1" as vfd1 {
+        artifact "Modbus RTU/TCP" as modbus_vfd1
+        component "Drive Parameters" as params1
+    }
+    
+    node "ПЛК #2" as plc2 {
+        artifact "Modbus TCP Server" as modbus_plc2
+        component "Ladder Logic" as logic2
+    }
+}
+
+' Зв'язки
+browser <--> nodejs : HTTPS/WebSocket
+nodejs <--> mysql : MySQL Protocol
+nodejs <--> plc1 : Modbus TCP (502)
+nodejs <--> vfd1 : Modbus TCP (502)
+nodejs <--> plc2 : Modbus TCP (502)
+
+' Додаткові примітки
+note right of browser : Веб-інтерфейс\nдля операторів
+note right of mysql : Збереження конфігурацій\nта історії операцій
+note bottom of plc1 : Schneider Electric\nModicon M221
+note bottom of vfd1 : ABB ACS580\nFrequency Drive
+
+@enduml
